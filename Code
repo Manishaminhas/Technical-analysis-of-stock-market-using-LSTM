@@ -1,0 +1,285 @@
+!pip install yfinance 
+import yfinance as yf 
+import pandas as pd 
+ 
+# Define the ticker and the time period 
+ticker = "GOOGL" start_date = "2012-01-01" end_date = "2022-12-31" 
+ 
+# Download the historical data 
+data = yf.download(ticker, start=start_date, end=end_date) 
+ 
+# Save the data to a CSV file 
+data.to_csv(ticker + ".csv") 
+ 
+# Define the ticker and the time period 
+ticker = "AMZN" 
+start_date = "2012-01-01" 
+end_date = "2022-12-31" 
+ 
+# Download the historical data 
+data3 = yf.download(ticker, start=start_date, end=end_date) 
+ 
+# Save the data to a CSV file 
+data.to_csv(ticker + ".csv") 
+
+# Define the ticker and the time period 
+ticker = "META" 
+start_date = "2012-01-01" 
+end_date = "2022-12-31" 
+ 
+# Download the historical data 
+data2 = yf.download(ticker, start=start_date, end=end_date) 
+ 
+# Save the data to a CSV file 
+data.to_csv(ticker + ".csv") 
+ 
+# Define the ticker and the time period 
+ticker = "AAPL" 
+start_date = "2012-01-01" 
+end_date = "2022-12-31" 
+ 
+# Download the historical data 
+data1 = yf.download(ticker, start=start_date, end=end_date) 
+ 
+# Save the data to a CSV file 
+data.to_csv(ticker + ".csv") 
+ 
+# List of CSV filenames for each company's stock data 
+filenames = ['AAPL.csv', 'GOOGL.csv', 'META.csv', 'AMZN.csv'] 
+ 
+# Load data from CSV files into separate dataframes 
+dfs = [] for filename in filenames: 
+df = pd.read_csv(filename, index_col='Date', parse_dates=True)     
+
+# Rename columns to include company ticker symbol     
+df.columns = [f"{col}_{filename.split('.')[0]}" for col in df.columns]     
+dfs.append(df) 
+ 
+# Combine dataframes into a single dataframe with separate columns for each company 
+df_combined = pd.concat(dfs, axis=1) 
+ 
+# Print the combined dataframe 
+print(df_combined.head()) 
+
+import numpy as np 
+import tensorflow as tf 
+from sklearn.preprocessing import RobustScaler 
+ 
+# Load data 
+df = pd.read_csv('GOOGL.csv', index_col='Date', parse_dates=True) 
+ 
+# Split data into training and testing sets 
+train_data = df.iloc[:-250, :] 
+test_data = df.iloc[-250:, :] 
+ 
+# Scale data using robust scaler 
+scaler = RobustScaler() 
+train_data = scaler.fit_transform(train_data) 
+test_data = scaler.transform(test_data) 
+ 
+# Define function to create time series data with lookback window 
+def create_time_series(data, window_size): 
+                                X = []     y = []     
+for i in range(window_size, len(data)):         
+        X.append(data[i-window_size:i, :]) 
+        y.append(data[i, :])     
+return np.array(X), np.array(y) 
+ 
+# Define hyperparameters 
+window_size = 60 batch_size = 32 epochs = 100 
+ 
+# Create time series data with lookback window 
+X_train, y_train = create_time_series(train_data, window_size) 
+X_test, y_test = create_time_series(test_data, window_size) 
+ 
+# Build LSTM model 
+model = tf.keras.models.Sequential([tf.keras.layers.LSTM(64, input_shape=(X_train.shape[1], X_train.shape[2])),     
+                                    tf.keras.layers.Dense(32, activation='relu'),     
+                                    tf.keras.layers.Dense(y_train.shape[1]) 
+]) 
+ 
+# Compile model 
+model.compile(optimizer='adam', loss='mse') 
+ 
+# Train model 
+history = model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1) 
+ 
+# Evaluate model on test data 
+model.evaluate(X_test, y_test) 
+ 
+# Load test data for different company 
+df2 = pd.read_csv('AMZN.csv', index_col='Date', parse_dates=True) 
+ 
+# Scale data using robust scaler 
+test_data2 = scaler.transform(df2) 
+
+# Create time series data with lookback window 
+X_test2, y_test2 = create_time_series(test_data2, window_size) 
+ 
+# Evaluate model on test data for different company model.evaluate(X_test2, y_test2) 
+ 
+import matplotlib.pyplot as plt 
+ 
+# Plot training and validation loss values 
+plt.plot(history.history['loss']) 
+plt.plot(history.history['val_loss']) 
+plt.title('Model Loss') 
+plt.ylabel('Loss (MSE)') 
+plt.xlabel('Epoch') 
+plt.legend(['Train', 'Validation'], loc='upper right') 
+plt.show() 
+
+# Make a prediction for the desired date 
+date = '2022-12-30' 
+ 
+# Get the data for the desired 
+date data_for_date = df2[df2.index == date] 
+ 
+# Extract the underlying NumPy array from the DataFrame 
+data_for_date_array = data_for_date.values 
+ 
+# Reshape the input data 
+data_for_date_reshaped = data_for_date_array.reshape(1, 1, 6) 
+ 
+# Make a prediction 
+prediction = model.predict(data_for_date_reshaped) 
+
+# Compare the prediction to the actual price 
+actual_price = df2.loc[date, 'Close'] 
+ 
+# Print the prediction and the actual price 
+print('Prediction:', prediction) 
+print('Actual price:', actual_price) 
+
+# Load data 
+df = pd.read_csv('GOOGL.csv', index_col='Date', parse_dates=True) 
+ 
+# Split data into training and testing sets 
+train_data = df.iloc[:-250, :] 
+test_data = df.iloc[-250:, :] 
+ 
+# Scale data using robust scaler 
+scaler = RobustScaler() 
+train_data = scaler.fit_transform(train_data) 
+test_data = scaler.transform(test_data) 
+ 
+# Define function to create time series data with lookback window 
+def create_time_series(data, window_size): 
+    X = []     y = []     
+    for i in range(window_size, len(data)):         
+                                    X.append(data[i-window_size:i, :]) 
+                                    y.append(data[i, :])     
+return np.array(X), np.array(y) 
+ 
+# Define hyperparameters 
+window_size = 60 
+batch_size = 32 
+epochs = 100 
+ 
+# Create time series data with lookback window 
+X_train, y_train = create_time_series(train_data, window_size) 
+X_test, y_test = create_time_series(test_data, window_size) 
+ 
+# Build LSTM model model1 = tf.keras.models.Sequential([ 
+    tf.keras.layers.LSTM(64, input_shape=(X_train.shape[1], X_train.shape[2])),     
+    tf.keras.layers.Dense(32, activation='relu'),     
+    tf.keras.layers.Dense(y_train.shape[1]) 
+]) 
+ 
+# Compile model 
+model1.compile(optimizer='adam', loss='mse') 
+ 
+# Train model 
+history1 = model1.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1) 
+ 
+# Evaluate model on test data 
+model1.evaluate(X_test, y_test) 
+ 
+# Load test data for different company 
+df3 = pd.read_csv('META.csv', index_col='Date', parse_dates=True) 
+ 
+# Scale data using robust scaler 
+test_data3 = scaler.transform(df3) 
+ 
+# Create time series data with lookback window 
+X_test3, y_test3 = create_time_series(test_data3, window_size) 
+ 
+# Evaluate model on test data for different company 
+model1.evaluate(X_test3, y_test3) 
+import matplotlib.pyplot as plt 
+ 
+# Plot training and validation loss values 
+plt.plot(history1.history['loss']) 
+plt.plot(history1.history['val_loss']) 
+plt.title('Model Loss') 
+plt.ylabel('Loss (MSE)') 
+plt.xlabel('Epoch') 
+plt.legend(['Train', 'Validation'], loc='upper right') 
+plt.show() 
+
+# Load data 
+df = pd.read_csv('GOOGL.csv', index_col='Date', parse_dates=True) 
+ 
+# Split data into training and testing sets 
+train_data = df.iloc[:-250, :] 
+test_data = df.iloc[-250:, :] 
+ 
+# Scale data using robust scaler 
+scaler = RobustScaler() 
+train_data = scaler.fit_transform(train_data) 
+test_data = scaler.transform(test_data) 
+ 
+# Define function to create time series data with lookback window 
+def create_time_series(data, window_size): 
+    X = []     y = []     
+for i in range(window_size, len(data)): 
+                        X.append(data[i-window_size:i, :]) 
+                        y.append(data[i, :])     
+return np.array(X), np.array(y) 
+ 
+# Define hyperparameters 
+window_size = 60 
+batch_size = 32 
+epochs = 100 
+ 
+# Create time series data with lookback window 
+X_train, y_train = create_time_series(train_data, window_size) 
+X_test, y_test = create_time_series(test_data, window_size) 
+ 
+# Build LSTM model 
+model2 = tf.keras.models.Sequential([tf.keras.layers.LSTM(64, input_shape=(X_train.shape[1], X_train.shape[2])),
+                                    tf.keras.layers.Dense(32, activation='relu'),     
+                                    tf.keras.layers.Dense(y_train.shape[1]) 
+]) 
+ 
+# Compile model 
+model2.compile(optimizer='adam', loss='mse') 
+ 
+# Train model 
+history2 = model2.fit(X_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1) 
+ 
+# Evaluate model on test data 
+model2.evaluate(X_test, y_test) 
+
+# Load test data for different company 
+df4 = pd.read_csv('AAPL.csv', index_col='Date', parse_dates=True) 
+ 
+# Scale data using robust scaler 
+test_data4 = scaler.transform(df4) 
+ 
+# Create time series data with lookback window 
+X_test4, y_test4 = create_time_series(test_data3, window_size) 
+ 
+# Evaluate model on test data for different company model2.evaluate(X_test4, y_test4) 
+ 
+import matplotlib.pyplot as plt 
+ 
+# Plot training and validation loss values 
+plt.plot(history2.history['loss']) 
+plt.plot(history2.history['val_loss']) 
+plt.title('Model Loss') 
+plt.ylabel('Loss (MSE)') 
+plt.xlabel('Epoch') 
+plt.legend(['Train', 'Validation'], loc='upper right') 
+plt.show() 
+ 
